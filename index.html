@@ -62,7 +62,7 @@
 <body>
     <div id='header'> 
         <h1> The Echo Nest + Deezer Playlist Demo</h1>
-        Enter an artist: <input id='artist-name' type='text'>
+        Enter a tempo in BPM: <input id='artist-name' type='text'>
     </div>
     <div id="info"> </div>
     <div id='playlist'> </div>
@@ -85,7 +85,7 @@ function createSongDiv(song) {
 
 function addSongs(songs) {
     var playlist = $("#playlist");
-
+		// console.log(songs)
     for (var i = 0; i < songs.length; i++) {
         var div = createSongDiv(songs[i]);
         playlist.append(div);
@@ -97,11 +97,12 @@ function addSongs(songs) {
 function fetchDeezerTrack(song, div) {
     if (song.tracks.length > 0) {
         var tid = song.tracks[0].foreign_id.split(':')[2];
+			  // console.log(tid);
         var url = 'http://api.deezer.com/2.0/track/' + tid + '?callback=?'
 
         jQuery.getJSON(url, { output:'jsonp', bucket: ['audio_summary'],},
             function(data) {
-			          console.log(data);
+			          // console.log(data);
                 var link = $("<a target='deezer'>").attr('href', data.link);
                 var cover = $("<img class='timg'>").attr('src', data.album.cover).attr("style", "float:left");
                 link.append(cover);
@@ -148,6 +149,7 @@ function fetchPlaylist(tempo) {
         {   format:'jsonp', 
             max_tempo:parseFloat(tempo),
             min_tempo:parseFloat(tempo)-10,
+						style:'dance pop',
             bucket: ['id:deezer', 'tracks', 'audio_summary'],
             limit: true,
             'api_key' : DEEZER_DEMO_API_KEY
@@ -157,7 +159,7 @@ function fetchPlaylist(tempo) {
             if (data.response.status.code == 0) {
                 var songs = data.response.songs;
                 addSongs(songs);
-							  console.log(songs);
+							  // console.log(songs);
             } else {
                 info("Can't create a playlist for " + artist);
             }
