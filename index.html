@@ -72,7 +72,7 @@
 
 <script type="text/javascript">
 
-var DEEZER_DEMO_API_KEY='V3WFT6DHG0RJX4UD2';
+var DEEZER_DEMO_API_KEY='LJK6MHSQU8PUJD41F';
 
 var audio
 jQuery.ajaxSettings.traditional = true;
@@ -99,8 +99,9 @@ function fetchDeezerTrack(song, div) {
         var tid = song.tracks[0].foreign_id.split(':')[2];
         var url = 'http://api.deezer.com/2.0/track/' + tid + '?callback=?'
 
-        jQuery.getJSON(url, { output:'jsonp'},
+        jQuery.getJSON(url, { output:'jsonp', bucket: ['audio_summary'],},
             function(data) {
+			          console.log(data);
                 var link = $("<a target='deezer'>").attr('href', data.link);
                 var cover = $("<img class='timg'>").attr('src', data.album.cover).attr("style", "float:left");
                 link.append(cover);
@@ -110,6 +111,7 @@ function fetchDeezerTrack(song, div) {
                 tdiv.append( $("<div class='title'>").text(data.title));
                 tdiv.append( $("<div>").text(data.album.title));
                 tdiv.append( $("<div>").text(data.artist.name));
+								tdiv.append($("<div>").text(data.bpm+" BMP"));
                 div.append(tdiv);
                 div.append(createPlayer(data.preview));
                 div.append($('<br clear="left">'));
@@ -129,7 +131,7 @@ function createPlayButton(audio) {
 }
 
 function createPlayer(audio) {
-    var player = $("<audio class='player' preload='none' controls='controls'>").attr("src", audio);
+    var player = $("<audio class='player' type='audio/mpeg' preload='none' controls='controls'>").attr("src", audio);
     return player;
 }
 
@@ -138,15 +140,15 @@ function info(msg) {
     $("#info").text(msg);
 }
 
-function fetchPlaylist(artist) {
-    info("Getting playlist for " + artist);
+function fetchPlaylist(tempo) {
+    info("Getting playlist for " + tempo);
     $("#playlist").empty();
-    var url = 'http://developer.echonest.com/api/v4/playlist/static?callback=?'
+    var url = 'http://developer.echonest.com/api/v4/song/search?callback=?'
     jQuery.getJSON(url, 
-        {   artist:artist, 
-            type:'artist-radio', 
-            format:'jsonp', 
-            bucket: ['id:deezer', 'tracks'],
+        {   format:'jsonp', 
+            max_tempo:parseFloat(tempo),
+            min_tempo:parseFloat(tempo)-10,
+            bucket: ['id:deezer', 'tracks', 'audio_summary'],
             limit: true,
             'api_key' : DEEZER_DEMO_API_KEY
         },
@@ -155,6 +157,7 @@ function fetchPlaylist(artist) {
             if (data.response.status.code == 0) {
                 var songs = data.response.songs;
                 addSongs(songs);
+							  console.log(songs);
             } else {
                 info("Can't create a playlist for " + artist);
             }
